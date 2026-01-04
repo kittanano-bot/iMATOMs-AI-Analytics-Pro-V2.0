@@ -1,0 +1,2238 @@
+<!doctype html>
+<html lang="th" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iMATOMs - AI Analytics Dashboard Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&amp;family=Rajdhani:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+        body { box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17,24,39,0.9);
+            --accent-cyan: #00f5ff;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.6);
+            --border-color: rgba(0,245,255,0.2);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+        
+        /* Light mode - softer, easier on eyes */
+        .light-mode {
+            --bg-primary: #e8ecf0;
+            --bg-secondary: #f5f7fa;
+            --bg-card: rgba(255,255,255,0.95);
+            --accent-cyan: #0891b2;
+            --accent-purple: #7c3aed;
+            --text-primary: #2d3748;
+            --text-secondary: rgba(45,55,72,0.7);
+            --border-color: rgba(8,145,178,0.25);
+        }
+        
+        * { font-family: 'Rajdhani', sans-serif; }
+        .font-display { font-family: 'Orbitron', monospace; }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        /* Dark mode subtle gradient - no grid pattern */
+        body:not(.light-mode) {
+            background: linear-gradient(180deg, #0a0e17 0%, #0f1629 50%, #0a0e17 100%);
+        }
+        
+        /* Light mode clean background */
+        body.light-mode {
+            background: linear-gradient(180deg, #e8ecf0 0%, #f0f4f8 50%, #e8ecf0 100%);
+        }
+        
+        .glow-border {
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 20px rgba(0,245,255,0.1);
+        }
+        
+        .nav-item {
+            position: relative;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .nav-item:hover {
+            color: var(--accent-cyan);
+            background: rgba(0,245,255,0.1);
+        }
+        
+        .nav-item.active {
+            color: var(--accent-cyan);
+            background: rgba(0,245,255,0.15);
+            border: 1px solid var(--border-color);
+        }
+        
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: var(--accent-cyan);
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+        
+        .nav-item.special {
+            background: linear-gradient(135deg, rgba(168,85,247,0.2) 0%, rgba(0,245,255,0.2) 100%);
+            border: 1px solid rgba(168,85,247,0.4);
+        }
+        
+        .nav-item.special:hover {
+            background: linear-gradient(135deg, rgba(168,85,247,0.3) 0%, rgba(0,245,255,0.3) 100%);
+            box-shadow: 0 0 20px rgba(168,85,247,0.3);
+        }
+        
+        .nav-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+            margin: 12px 0;
+        }
+        
+        .nav-section-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            padding: 8px 20px 4px;
+            opacity: 0.7;
+        }
+        
+        .cyber-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-card:hover {
+            border-color: rgba(0,245,255,0.4);
+            box-shadow: 0 0 30px rgba(0,245,255,0.1);
+        }
+        
+        .status-card {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-cyan);
+        }
+        
+        .status-card.warning::before {
+            background: var(--warning);
+            animation: pulse-glow 1s ease-in-out infinite;
+        }
+        
+        .status-card.danger::before {
+            background: var(--danger);
+            animation: pulse-glow 0.5s ease-in-out infinite;
+        }
+        
+        .status-card.success::before {
+            background: var(--success);
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; box-shadow: 0 0 10px currentColor; }
+            50% { opacity: 0.5; box-shadow: 0 0 20px currentColor; }
+        }
+        
+        .alert-flash { animation: flash 0.5s ease-in-out infinite; }
+        
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .cyber-btn {
+            background: linear-gradient(135deg, rgba(0,245,255,0.2) 0%, rgba(168,85,247,0.2) 100%);
+            border: 1px solid rgba(0,245,255,0.4);
+            color: var(--accent-cyan);
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .cyber-btn:hover {
+            background: linear-gradient(135deg, rgba(0,245,255,0.3) 0%, rgba(168,85,247,0.3) 100%);
+            box-shadow: 0 0 20px rgba(0,245,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .cyber-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .cyber-btn-danger {
+            background: linear-gradient(135deg, rgba(239,68,68,0.2) 0%, rgba(239,68,68,0.1) 100%);
+            border-color: rgba(239,68,68,0.4);
+            color: var(--danger);
+        }
+        
+        .cyber-btn-danger:hover {
+            background: linear-gradient(135deg, rgba(239,68,68,0.3) 0%, rgba(239,68,68,0.2) 100%);
+            box-shadow: 0 0 20px rgba(239,68,68,0.3);
+        }
+        
+        .cyber-btn-success {
+            background: linear-gradient(135deg, rgba(16,185,129,0.2) 0%, rgba(16,185,129,0.1) 100%);
+            border-color: rgba(16,185,129,0.4);
+            color: var(--success);
+        }
+        
+        .cyber-input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .light-mode .cyber-input { background: rgba(255,255,255,0.8); }
+        
+        .cyber-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0,245,255,0.2);
+        }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        ::-webkit-scrollbar-thumb { background: rgba(0,245,255,0.3); border-radius: 3px; }
+        
+        .page {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .float { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .tab-cyber {
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .tab-cyber:hover {
+            border-color: rgba(0,245,255,0.4);
+            color: var(--accent-cyan);
+        }
+        
+        .tab-cyber.active {
+            background: rgba(0,245,255,0.15);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .mute-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(239,68,68,0.2);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            display: none;
+        }
+        
+        .mute-btn.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse-glow 1s ease-in-out infinite;
+        }
+        
+        .mute-btn.muted {
+            background: rgba(100,100,100,0.2);
+            border-color: #666;
+            color: #666;
+            animation: none;
+        }
+        
+        .dashboard-container { position: relative; transition: all 0.3s ease; }
+        .dashboard-container.size-small { height: 400px; }
+        .dashboard-container.size-medium { height: 600px; }
+        .dashboard-container.size-large { height: 800px; }
+        .dashboard-container.size-full { height: calc(100% - 80px); min-height: 700px; }
+        
+        .size-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+            color: var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .size-btn:hover, .size-btn.active {
+            background: rgba(0,245,255,0.2);
+            border-color: var(--accent-cyan);
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10,14,23,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 16px;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0,245,255,0.2);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .login-container {
+            min-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-box { width: 100%; max-width: 420px; }
+        
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-admin { background: rgba(168,85,247,0.2); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
+        .badge-pending { background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+        .badge-approved { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-rejected { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+        
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-right: 48px; }
+        
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.3s;
+        }
+        
+        .password-toggle:hover { color: var(--accent-cyan); }
+        
+        /* iMATOMs Dashboard Cards */
+        .imatoms-card {
+            background: linear-gradient(135deg, rgba(168,85,247,0.1) 0%, rgba(0,245,255,0.1) 100%);
+            border: 1px solid rgba(168,85,247,0.3);
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .imatoms-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+        }
+        
+        .imatoms-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(168,85,247,0.2);
+            border-color: rgba(168,85,247,0.6);
+        }
+        
+        .imatoms-card .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        
+        .imatoms-subitem {
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .imatoms-subitem:hover {
+            background: rgba(0,245,255,0.15);
+            color: var(--accent-cyan);
+        }
+        
+        /* Module Cards - Future Features */
+        .module-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px dashed rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .module-card:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0,245,255,0.05);
+        }
+        
+        .module-card:hover .module-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .module-tooltip {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--accent-cyan);
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .module-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--border-color);
+        }
+        
+        .coming-soon-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            color: white;
+            font-size: 9px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+        
+        /* Sidebar toggle buttons */
+        .sidebar-toggle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            color: var(--accent-cyan);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-toggle-btn:hover {
+            background: rgba(0,245,255,0.15);
+            transform: scale(1.05);
+        }
+        
+        /* DateTime display */
+        .datetime-display {
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+        
+        .datetime-display .time {
+            font-family: 'Orbitron', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+        
+        .datetime-display .date {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full"><!-- LOGIN PAGE -->
+  <div id="login-page" class="login-container">
+   <div class="login-box">
+    <div class="cyber-card p-8">
+     <div class="text-center mb-8">
+      <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center mb-4 float"><i class="fa-solid fa-atom text-4xl text-white"></i>
+      </div>
+      <h1 class="font-display text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">iMATOMs</h1>
+      <p class="text-sm mt-1" style="color: var(--text-secondary);">Mobilization System</p>
+     </div>
+     <form id="login-form" class="space-y-4" style="display: block;">
+      <div><label for="login-username" class="block text-sm mb-2" style="color: var(--text-secondary);">Username</label> <input type="text" id="login-username" class="cyber-input" placeholder="Enter username" required>
+      </div>
+      <div><label for="login-password" class="block text-sm mb-2" style="color: var(--text-secondary);">Password</label>
+       <div class="password-wrapper"><input type="password" id="login-password" class="cyber-input" placeholder="Enter password" required> <button type="button" class="password-toggle" onclick="togglePassword('login-password', this)" aria-label="Toggle password visibility"> <i class="fa-solid fa-eye"></i> </button>
+       </div>
+      </div>
+      <div id="login-error" class="hidden p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm"></div><button type="submit" class="cyber-btn w-full py-3 text-lg"> <i class="fa-solid fa-right-to-bracket mr-2"></i>Login </button>
+     </form>
+     <form id="register-form" class="space-y-4" style="display: none;">
+      <div><label for="reg-username" class="block text-sm mb-2" style="color: var(--text-secondary);">Username</label> <input type="text" id="reg-username" class="cyber-input" placeholder="Set username" required>
+      </div>
+      <div><label for="reg-email" class="block text-sm mb-2" style="color: var(--text-secondary);">Email</label> <input type="email" id="reg-email" class="cyber-input" placeholder="your@email.com" required>
+      </div>
+      <div><label for="reg-password" class="block text-sm mb-2" style="color: var(--text-secondary);">Password</label>
+       <div class="password-wrapper"><input type="password" id="reg-password" class="cyber-input" placeholder="Set password" required> <button type="button" class="password-toggle" onclick="togglePassword('reg-password', this)" aria-label="Toggle password visibility"> <i class="fa-solid fa-eye"></i> </button>
+       </div>
+      </div>
+      <div><label for="reg-building" class="block text-sm mb-2" style="color: var(--text-secondary);">Building</label> <select id="reg-building" class="cyber-input" required> <option value="">-- Select Building --</option> <option value="VM">ViMUT Hospital (VM)</option> <option value="VTH">Theptarin Hospital (VTH)</option> <option value="all">All Buildings</option> </select>
+      </div>
+      <div id="register-error" class="hidden p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm"></div>
+      <div id="register-success" class="hidden p-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 text-sm"></div><button type="submit" id="register-btn" class="cyber-btn w-full py-3 text-lg"> <i class="fa-solid fa-user-plus mr-2"></i>Register </button>
+     </form>
+     <div class="mt-6 text-center">
+      <p id="toggle-text" class="text-sm" style="color: var(--text-secondary);">Don't have an account? <button type="button" onclick="toggleAuthForm()" class="text-cyan-400 hover:underline font-semibold">Register</button></p>
+     </div>
+    </div>
+   </div>
+  </div><!-- MAIN APP -->
+  <div id="main-app" class="flex h-full overflow-hidden" style="display: none;"><!-- Sidebar Navigation -->
+   <nav class="w-72 border-r flex flex-col p-4 shrink-0 overflow-y-auto" style="background: rgba(0,0,0,0.4); border-color: var(--border-color);"><!-- Logo + Toggle Buttons -->
+    <div class="mb-6 p-4">
+     <div class="flex items-center justify-between mb-3">
+      <div>
+       <h1 class="font-display text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">iMATOMs</h1>
+       <p class="text-xs mt-1" style="color: var(--text-secondary);">Mobilization System</p>
+      </div><!-- Toggle Buttons in Sidebar -->
+      <div class="flex gap-2"><button class="sidebar-toggle-btn" onclick="toggleLanguage()" title="Switch Language"> <span id="lang-indicator" class="font-bold text-sm">EN</span> </button> <button class="sidebar-toggle-btn" onclick="toggleTheme()" title="Toggle Theme"> <i class="fa-solid fa-sun" id="theme-icon"></i> </button>
+      </div>
+     </div>
+    </div><!-- Nav Items -->
+    <div class="flex-1 space-y-1" id="nav-menu"></div><!-- User Info -->
+    <div class="pt-4 border-t" style="border-color: var(--border-color);">
+     <div class="flex items-center gap-3 p-3 rounded-lg" style="background: rgba(0,0,0,0.3);">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center"><i class="fa-solid fa-user text-white"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+       <p class="font-semibold text-sm truncate" id="user-display-name" style="color: var(--text-primary);">User</p>
+       <p class="text-xs" id="user-display-role" style="color: var(--accent-cyan);">Role</p>
+      </div><button onclick="logout()" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500/20 transition-colors" title="Logout"> <i class="fa-solid fa-sign-out-alt text-red-400"></i> </button>
+     </div><!-- DateTime Display -->
+     <div class="datetime-display mt-3">
+      <div class="time" id="current-time">
+       00:00:00
+      </div>
+      <div class="date" id="current-date">
+       Loading...
+      </div>
+     </div>
+    </div>
+   </nav><!-- Main Content -->
+   <main class="flex-1 overflow-auto p-6"><!-- iMATOMs PAGE -->
+    <section id="page-imatoms" class="page active">
+     <header class="mb-6">
+      <h2 class="font-display text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">iMATOMs MOBILIZATION SYSTEM</h2>
+      <p style="color: var(--text-secondary);">Integrated Management &amp; Analytics for Total Operations Management System</p>
+     </header>
+     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8"><!-- Reliability Dashboard -->
+      <div class="imatoms-card" onclick="showPage('reliability')">
+       <div class="card-icon" style="background: linear-gradient(135deg, rgba(16,185,129,0.3), rgba(16,185,129,0.1));">
+        🔧
+       </div>
+       <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Reliability Dashboard</h3>
+       <p class="text-sm mb-4" style="color: var(--text-secondary);">Asset &amp; Maintenance Management</p>
+       <div class="flex flex-wrap gap-2"><span class="imatoms-subitem"><i class="fa-solid fa-cube"></i> Asset Management</span> <span class="imatoms-subitem"><i class="fa-solid fa-calendar-check"></i> PPM</span> <span class="imatoms-subitem"><i class="fa-solid fa-wrench"></i> Work Order</span> <span class="imatoms-subitem"><i class="fa-solid fa-boxes-stacked"></i> Inventory</span> <span class="imatoms-subitem"><i class="fa-solid fa-mobile"></i> Mobile App</span>
+       </div>
+      </div><!-- Quality & Safety Dashboard -->
+      <div class="imatoms-card" onclick="showPage('quality')">
+       <div class="card-icon" style="background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(59,130,246,0.1));">
+        🛡️
+       </div>
+       <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Quality &amp; Safety Dashboard</h3>
+       <p class="text-sm mb-4" style="color: var(--text-secondary);">Standards &amp; Quality Control</p>
+       <div class="flex flex-wrap gap-2"><span class="imatoms-subitem"><i class="fa-solid fa-certificate"></i> JCI Standard</span> <span class="imatoms-subitem"><i class="fa-solid fa-hospital"></i> HA Standard</span> <span class="imatoms-subitem"><i class="fa-solid fa-chart-pie"></i> Quality Report</span>
+       </div>
+      </div><!-- Cost Efficiency Dashboard -->
+      <div class="imatoms-card" onclick="showPage('cost')">
+       <div class="card-icon" style="background: linear-gradient(135deg, rgba(245,158,11,0.3), rgba(245,158,11,0.1));">
+        💰
+       </div>
+       <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Cost Efficiency Dashboard</h3>
+       <p class="text-sm mb-4" style="color: var(--text-secondary);">Financial &amp; Investment Management</p>
+       <div class="flex flex-wrap gap-2"><span class="imatoms-subitem"><i class="fa-solid fa-coins"></i> CAPEX &amp; OPEX</span> <span class="imatoms-subitem"><i class="fa-solid fa-bolt"></i> Energy Mgmt</span> <span class="imatoms-subitem"><i class="fa-solid fa-shield-halved"></i> Safety Investment</span> <span class="imatoms-subitem"><i class="fa-solid fa-leaf"></i> Environmental</span>
+       </div>
+      </div><!-- ESG & Environment Dashboard -->
+      <div class="imatoms-card" onclick="showPage('esg')">
+       <div class="card-icon" style="background: linear-gradient(135deg, rgba(34,197,94,0.3), rgba(34,197,94,0.1));">
+        🌍
+       </div>
+       <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">ESG &amp; Environment Dashboard</h3>
+       <p class="text-sm mb-4" style="color: var(--text-secondary);">Sustainability &amp; Net Zero</p>
+       <div class="flex flex-wrap gap-2"><span class="imatoms-subitem"><i class="fa-solid fa-temperature-low"></i> Net Zero</span> <span class="imatoms-subitem"><i class="fa-solid fa-recycle"></i> Recycle</span> <span class="imatoms-subitem"><i class="fa-solid fa-gauge"></i> Scope 1/2/3</span> <span class="imatoms-subitem"><i class="fa-solid fa-heart"></i> CSR</span>
+       </div>
+      </div><!-- Staff Utilization Dashboard -->
+      <div class="imatoms-card" onclick="showPage('staff')">
+       <div class="card-icon" style="background: linear-gradient(135deg, rgba(168,85,247,0.3), rgba(168,85,247,0.1));">
+        👥
+       </div>
+       <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Staff Utilization Dashboard</h3>
+       <p class="text-sm mb-4" style="color: var(--text-secondary);">HR &amp; Workforce Management</p>
+       <div class="flex flex-wrap gap-2"><span class="imatoms-subitem"><i class="fa-solid fa-calendar-days"></i> Roster Plan</span> <span class="imatoms-subitem"><i class="fa-solid fa-graduation-cap"></i> Training</span> <span class="imatoms-subitem"><i class="fa-solid fa-star"></i> Skill Level</span> <span class="imatoms-subitem"><i class="fa-solid fa-road"></i> Career Path</span>
+       </div>
+      </div>
+     </div>
+    </section><!-- RELIABILITY PAGE -->
+    <section id="page-reliability" class="page">
+     <header class="flex items-center gap-4 mb-6"><button onclick="showPage('imatoms')" class="w-10 h-10 rounded-lg border flex items-center justify-center" style="background: rgba(0,0,0,0.3); border-color: var(--border-color); color: var(--accent-cyan);"> <i class="fa-solid fa-arrow-left"></i> </button>
+      <div>
+       <h2 class="font-display text-3xl font-bold mb-1" style="color: var(--text-primary);">🔧 RELIABILITY DASHBOARD</h2>
+       <p style="color: var(--text-secondary);">Asset &amp; Maintenance Management System</p>
+      </div>
+     </header>
+     <div class="cyber-card p-6 text-center">
+      <div class="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r from-green-500/20 to-cyan-500/20 flex items-center justify-center mb-4"><i class="fa-solid fa-tools text-4xl text-green-400"></i>
+      </div>
+      <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Coming Soon</h3>
+      <p style="color: var(--text-secondary);">This module is under development. Check back for updates!</p>
+     </div>
+    </section><!-- QUALITY PAGE -->
+    <section id="page-quality" class="page">
+     <header class="flex items-center gap-4 mb-6"><button onclick="showPage('imatoms')" class="w-10 h-10 rounded-lg border flex items-center justify-center" style="background: rgba(0,0,0,0.3); border-color: var(--border-color); color: var(--accent-cyan);"> <i class="fa-solid fa-arrow-left"></i> </button>
+      <div>
+       <h2 class="font-display text-3xl font-bold mb-1" style="color: var(--text-primary);">🛡️ QUALITY &amp; SAFETY</h2>
+       <p style="color: var(--text-secondary);">Standards &amp; Quality Control System</p>
+      </div>
+     </header>
+     <div class="cyber-card p-6 text-center">
+      <div class="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r from-blue-500/20 to-cyan-500/20 flex items-center justify-center mb-4"><i class="fa-solid fa-shield-halved text-4xl text-blue-400"></i>
+      </div>
+      <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Coming Soon</h3>
+      <p style="color: var(--text-secondary);">This module is under development. Check back for updates!</p>
+     </div>
+    </section><!-- COST PAGE -->
+    <section id="page-cost" class="page">
+     <header class="flex items-center gap-4 mb-6"><button onclick="showPage('imatoms')" class="w-10 h-10 rounded-lg border flex items-center justify-center" style="background: rgba(0,0,0,0.3); border-color: var(--border-color); color: var(--accent-cyan);"> <i class="fa-solid fa-arrow-left"></i> </button>
+      <div>
+       <h2 class="font-display text-3xl font-bold mb-1" style="color: var(--text-primary);">💰 COST EFFICIENCY</h2>
+       <p style="color: var(--text-secondary);">Financial &amp; Investment Management</p>
+      </div>
+     </header>
+     <div class="cyber-card p-6 text-center">
+      <div class="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 flex items-center justify-center mb-4"><i class="fa-solid fa-chart-line text-4xl text-yellow-400"></i>
+      </div>
+      <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Coming Soon</h3>
+      <p style="color: var(--text-secondary);">This module is under development. Check back for updates!</p>
+     </div>
+    </section><!-- ESG PAGE -->
+    <section id="page-esg" class="page">
+     <header class="flex items-center gap-4 mb-6"><button onclick="showPage('imatoms')" class="w-10 h-10 rounded-lg border flex items-center justify-center" style="background: rgba(0,0,0,0.3); border-color: var(--border-color); color: var(--accent-cyan);"> <i class="fa-solid fa-arrow-left"></i> </button>
+      <div>
+       <h2 class="font-display text-3xl font-bold mb-1" style="color: var(--text-primary);">🌍 ESG &amp; ENVIRONMENT</h2>
+       <p style="color: var(--text-secondary);">Sustainability &amp; Net Zero Goals</p>
+      </div>
+     </header>
+     <div class="cyber-card p-6 text-center">
+      <div class="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r from-green-500/20 to-teal-500/20 flex items-center justify-center mb-4"><i class="fa-solid fa-leaf text-4xl text-green-400"></i>
+      </div>
+      <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Coming Soon</h3>
+      <p style="color: var(--text-secondary);">This module is under development. Check back for updates!</p>
+     </div>
+    </section><!-- STAFF PAGE -->
+    <section id="page-staff" class="page">
+     <header class="flex items-center gap-4 mb-6"><button onclick="showPage('imatoms')" class="w-10 h-10 rounded-lg border flex items-center justify-center" style="background: rgba(0,0,0,0.3); border-color: var(--border-color); color: var(--accent-cyan);"> <i class="fa-solid fa-arrow-left"></i> </button>
+      <div>
+       <h2 class="font-display text-3xl font-bold mb-1" style="color: var(--text-primary);">👥 STAFF UTILIZATION</h2>
+       <p style="color: var(--text-secondary);">HR &amp; Workforce Management</p>
+      </div>
+     </header>
+     <div class="cyber-card p-6 text-center">
+      <div class="w-24 h-24 mx-auto rounded-2xl bg-gradient-to-r from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-4"><i class="fa-solid fa-users text-4xl text-purple-400"></i>
+      </div>
+      <h3 class="font-display text-xl mb-2" style="color: var(--text-primary);">Coming Soon</h3>
+      <p style="color: var(--text-secondary);">This module is under development. Check back for updates!</p>
+     </div>
+    </section><!-- MONITOR PAGE -->
+    <section id="page-monitor" class="page h-full">
+     <header class="flex items-center justify-between mb-4 flex-wrap gap-4">
+      <div>
+       <h2 class="font-display text-3xl font-bold mb-1" style="color: var(--text-primary);">DASHBOARD MONITOR</h2>
+       <p style="color: var(--text-secondary);">Real-time data visualization</p>
+      </div>
+      <div class="flex items-center gap-2"><span class="text-sm mr-2" style="color: var(--text-secondary);">Size:</span> <button class="size-btn" onclick="setDashboardSize('monitor', 'small')" title="Small"><i class="fa-solid fa-compress text-sm"></i></button> <button class="size-btn" onclick="setDashboardSize('monitor', 'medium')" title="Medium"><i class="fa-solid fa-square text-sm"></i></button> <button class="size-btn" onclick="setDashboardSize('monitor', 'large')" title="Large"><i class="fa-solid fa-expand text-sm"></i></button> <button class="size-btn active" onclick="setDashboardSize('monitor', 'full')" title="Fullscreen"><i class="fa-solid fa-maximize text-sm"></i></button>
+      </div>
+     </header>
+     <div id="monitor-tabs" class="flex gap-3 overflow-x-auto no-scrollbar pb-4"></div>
+     <div id="monitor-container" class="dashboard-container size-full cyber-card p-1 relative">
+      <div id="monitor-placeholder" class="h-full flex flex-col items-center justify-center text-center">
+       <div class="w-24 h-24 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-500 flex items-center justify-center mb-6 float"><i class="fa-solid fa-chart-line text-4xl text-white"></i>
+       </div>
+       <h3 class="font-display text-2xl mb-2" style="color: var(--text-primary);">SELECT DASHBOARD</h3>
+       <p style="color: var(--text-secondary);">Select a Dashboard from the tabs above</p>
+      </div>
+      <div id="monitor-info" class="hidden h-full">
+       <div class="h-full flex flex-col items-center justify-center text-center p-8">
+        <div id="monitor-icon" class="w-32 h-32 rounded-3xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 flex items-center justify-center mb-8 border-2" style="border-color: var(--border-color);"><span class="text-6xl">📊</span>
+        </div>
+        <h3 id="monitor-title" class="font-display text-3xl mb-4" style="color: var(--text-primary);">Dashboard Name</h3>
+        <p id="monitor-building" class="text-lg mb-6" style="color: var(--text-secondary);">Building Info</p>
+        <div class="p-4 rounded-xl border mb-6 max-w-xl w-full" style="background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3);">
+         <p class="text-sm text-yellow-400"><i class="fa-solid fa-info-circle mr-2"></i> Due to security restrictions, some dashboards cannot be displayed in iframe. Please click below to open in new tab.</p>
+        </div><a id="monitor-link" href="#" target="_blank" rel="noopener noreferrer" class="cyber-btn text-xl py-4 px-10 inline-flex items-center gap-3"> <i class="fa-solid fa-external-link-alt"></i> Open Dashboard </a>
+        <p id="monitor-url" class="mt-6 text-sm break-all max-w-xl" style="color: var(--text-secondary);"></p>
+       </div>
+      </div>
+     </div>
+    </section><!-- IOT DASHBOARD PAGE -->
+    <section id="page-iot" class="page h-full">
+     <header class="flex items-center justify-between mb-4 flex-wrap gap-4">
+      <div>
+       <h2 class="font-display text-3xl font-bold mb-1" style="color: var(--text-primary);">IOT DASHBOARD</h2>
+       <p style="color: var(--text-secondary);">Model A AIoT - Real-time sensor monitoring</p>
+      </div>
+      <div class="flex items-center gap-2"><span class="text-sm mr-2" style="color: var(--text-secondary);">Size:</span> <button class="size-btn" onclick="setDashboardSize('iot', 'small')"><i class="fa-solid fa-compress text-sm"></i></button> <button class="size-btn" onclick="setDashboardSize('iot', 'medium')"><i class="fa-solid fa-square text-sm"></i></button> <button class="size-btn" onclick="setDashboardSize('iot', 'large')"><i class="fa-solid fa-expand text-sm"></i></button> <button class="size-btn active" onclick="setDashboardSize('iot', 'full')"><i class="fa-solid fa-maximize text-sm"></i></button>
+      </div>
+     </header>
+     <div id="iot-container" class="dashboard-container size-full cyber-card p-1 relative">
+      <div id="iot-loading" class="loading-overlay">
+       <div class="loading-spinner mb-4"></div>
+       <p style="color: var(--accent-cyan);" class="font-semibold">Loading IoT Dashboard...</p>
+      </div><iframe id="iot-iframe" src="https://www.modelaaiot.com/dashboard/JdIcXHOF4gG3smYXyF5V" class="w-full h-full rounded-xl" frameborder="0" allowfullscreen onload="hideIotLoading()"></iframe>
+     </div>
+    </section><!-- AI ANALYTICS PAGE -->
+    <section id="page-ai" class="page">
+     <header class="flex items-center justify-between mb-6 flex-wrap gap-4">
+      <div>
+       <h2 class="font-display text-3xl font-bold mb-2" style="color: var(--text-primary);">AI ANALYTICS</h2>
+       <p style="color: var(--text-secondary);">Intelligent system monitoring &amp; alerts</p>
+      </div>
+      <div class="flex items-center gap-2 px-4 py-2 rounded-lg border" style="background: rgba(0,0,0,0.3); border-color: var(--border-color);"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> <span class="text-sm" style="color: var(--text-secondary);">Live Monitoring</span>
+      </div>
+     </header>
+     <div class="flex gap-3 mb-6 overflow-x-auto no-scrollbar pb-2" id="ai-filter-tabs"><button class="tab-cyber active" onclick="filterSystems('all', this)">📊 All</button> <button class="tab-cyber" onclick="filterSystems('VM', this)">🏥 ViMUT</button> <button class="tab-cyber" onclick="filterSystems('VTH', this)">🏨 Theptarin</button> <button class="tab-cyber" onclick="filterSystems('alert', this)">🚨 Alerts</button>
+     </div>
+     <div id="systems-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section><!-- DATA SETUP PAGE -->
+    <section id="page-datasetup" class="page">
+     <header class="mb-6">
+      <h2 class="font-display text-3xl font-bold mb-2" style="color: var(--text-primary);">DATA SETUP</h2>
+      <p style="color: var(--text-secondary);">Configure systems and dashboards (Admin only)</p>
+     </header>
+     <div class="flex gap-3 mb-6 overflow-x-auto no-scrollbar pb-2" id="datasetup-tabs"><button class="tab-cyber active" onclick="showDataSetupTab('systems', this)" data-tab="systems"> <i class="fa-solid fa-sliders mr-2"></i>AI Settings </button> <button class="tab-cyber" onclick="showDataSetupTab('dashboards', this)" data-tab="dashboards"> <i class="fa-solid fa-display mr-2"></i>Dashboard Management </button>
+     </div>
+     <div id="datasetup-systems" class="datasetup-content">
+      <div class="cyber-card p-6 mb-6">
+       <h3 class="font-display text-xl mb-4" style="color: var(--text-primary);"><i class="fa-solid fa-robot mr-2" style="color: var(--accent-cyan);"></i> System Threshold Configuration</h3>
+       <div id="settings-list" class="space-y-4"></div><button onclick="showAddSystemModal()" class="cyber-btn mt-6 flex items-center gap-2"> <i class="fa-solid fa-plus"></i> Add New System </button>
+      </div>
+     </div>
+     <div id="datasetup-dashboards" class="datasetup-content hidden">
+      <div class="cyber-card p-6 mb-6">
+       <h3 class="font-display text-xl mb-4" style="color: var(--text-primary);"><i class="fa-solid fa-display mr-2" style="color: var(--accent-cyan);"></i> Dashboard URLs</h3>
+       <div id="dashboard-list" class="space-y-4"></div><button onclick="showAddDashboardModal()" class="cyber-btn mt-6 flex items-center gap-2"> <i class="fa-solid fa-plus"></i> Add New Dashboard </button>
+      </div>
+     </div>
+    </section><!-- APPS PAGE -->
+    <section id="page-apps" class="page">
+     <header class="mb-6">
+      <h2 class="font-display text-3xl font-bold mb-2" style="color: var(--text-primary);">APPLICATIONS</h2>
+      <p style="color: var(--text-secondary);">All hospital applications</p>
+     </header>
+     <div class="flex gap-3 mb-6 overflow-x-auto no-scrollbar pb-2" id="apps-filter-tabs"><button class="tab-cyber active" onclick="filterApps('all', this)">📋 All</button> <button class="tab-cyber" onclick="filterApps('ViMUT Hospital', this)">🏥 ViMUT</button> <button class="tab-cyber" onclick="filterApps('Theptarin', this)">🏨 Theptarin</button>
+     </div>
+     <div id="apps-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+    </section><!-- ADMIN PAGE -->
+    <section id="page-admin" class="page">
+     <header class="mb-6">
+      <h2 class="font-display text-3xl font-bold mb-2" style="color: var(--text-primary);">ADMIN PANEL</h2>
+      <p style="color: var(--text-secondary);">System administration &amp; user management</p>
+     </header>
+     <div class="cyber-card p-6 mb-6">
+      <h3 class="font-display text-xl mb-4" style="color: var(--text-primary);"><i class="fa-solid fa-users mr-2" style="color: var(--accent-cyan);"></i> User Management</h3>
+      <div class="flex gap-3 mb-4 overflow-x-auto no-scrollbar" id="user-filter-tabs"><button class="tab-cyber active" onclick="filterUsers('all', this)">All</button> <button class="tab-cyber" onclick="filterUsers('pending', this)">⏳ Pending</button> <button class="tab-cyber" onclick="filterUsers('approved', this)">✅ Approved</button> <button class="tab-cyber" onclick="filterUsers('rejected', this)">❌ Rejected</button>
+      </div>
+      <div id="users-list" class="space-y-3"></div>
+     </div>
+     <div class="cyber-card p-6 mb-6">
+      <h3 class="font-display text-xl mb-4" style="color: var(--text-primary);"><i class="fa-solid fa-bell mr-2" style="color: var(--accent-cyan);"></i> Notification Settings</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+       <div class="rounded-xl p-4 border" style="background: rgba(0,0,0,0.3); border-color: var(--border-color);">
+        <div class="flex items-center gap-3 mb-4">
+         <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center"><i class="fa-brands fa-google text-green-400"></i>
+         </div>
+         <div>
+          <h4 class="font-semibold" style="color: var(--text-primary);">Google Chat</h4>
+          <p class="text-sm" style="color: var(--text-secondary);">Webhook URL</p>
+         </div>
+        </div><label for="google-chat-webhook" class="sr-only">Google Chat Webhook</label> <input type="text" id="google-chat-webhook" placeholder="https://chat.googleapis.com/v1/spaces/..." class="cyber-input text-sm"> <button onclick="testGoogleChat()" class="cyber-btn mt-3 text-sm w-full"> <i class="fa-solid fa-paper-plane mr-2"></i>Test Send </button>
+       </div>
+       <div class="rounded-xl p-4 border" style="background: rgba(0,0,0,0.3); border-color: var(--border-color);">
+        <div class="flex items-center gap-3 mb-4">
+         <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center"><i class="fa-solid fa-envelope text-blue-400"></i>
+         </div>
+         <div>
+          <h4 class="font-semibold" style="color: var(--text-primary);">Email Notification</h4>
+          <p class="text-sm" style="color: var(--text-secondary);">Alert Recipients</p>
+         </div>
+        </div><label for="email-recipients" class="sr-only">Email Recipients</label> <input type="text" id="email-recipients" placeholder="email1@example.com, email2@example.com" class="cyber-input text-sm"> <button onclick="testEmail()" class="cyber-btn mt-3 text-sm w-full" style="border-color: rgba(59,130,246,0.4); color: #3b82f6;"> <i class="fa-solid fa-paper-plane mr-2"></i>Test Send </button>
+       </div>
+      </div>
+     </div>
+     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="cyber-card p-4 text-center">
+       <div class="text-4xl font-display mb-2" id="stat-total" style="color: var(--accent-cyan);">
+        0
+       </div>
+       <div class="text-sm" style="color: var(--text-secondary);">
+        Total Systems
+       </div>
+      </div>
+      <div class="cyber-card p-4 text-center">
+       <div class="text-4xl font-display text-green-400 mb-2" id="stat-normal">
+        0
+       </div>
+       <div class="text-sm" style="color: var(--text-secondary);">
+        Normal
+       </div>
+      </div>
+      <div class="cyber-card p-4 text-center">
+       <div class="text-4xl font-display text-yellow-400 mb-2" id="stat-warning">
+        0
+       </div>
+       <div class="text-sm" style="color: var(--text-secondary);">
+        Warning
+       </div>
+      </div>
+      <div class="cyber-card p-4 text-center">
+       <div class="text-4xl font-display text-red-400 mb-2" id="stat-danger">
+        0
+       </div>
+       <div class="text-sm" style="color: var(--text-secondary);">
+        Danger
+       </div>
+      </div>
+     </div>
+    </section><!-- FUTURE MODULES SECTION -->
+    <section id="page-modules" class="page">
+     <header class="mb-6">
+      <h2 class="font-display text-3xl font-bold mb-2" style="color: var(--text-primary);">🚀 FUTURE MODULES</h2>
+      <p style="color: var(--text-secondary);">Upcoming features for enhanced facility management</p>
+     </header>
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"><!-- PM Module -->
+      <div class="module-card" onclick="showModuleInfo('pm')">
+       <div class="module-tooltip">
+        📊 Preventive Maintenance<br>
+        ระบบแจ้งเตือนงานบำรุงรักษาตามกำหนด
+       </div><span class="coming-soon-badge">COMING SOON</span>
+       <div class="text-4xl mb-4">
+        📊
+       </div>
+       <h3 class="font-display text-lg mb-2" style="color: var(--text-primary);">PM</h3>
+       <p class="text-sm" style="color: var(--text-secondary);">Preventive Maintenance</p>
+      </div><!-- Work Order Module -->
+      <div class="module-card" onclick="showModuleInfo('workorder')">
+       <div class="module-tooltip">
+        📝 Work Order<br>
+        ระบบใบสั่งงานซ่อม
+       </div><span class="coming-soon-badge">COMING SOON</span>
+       <div class="text-4xl mb-4">
+        📝
+       </div>
+       <h3 class="font-display text-lg mb-2" style="color: var(--text-primary);">Work Order</h3>
+       <p class="text-sm" style="color: var(--text-secondary);">Repair Order System</p>
+      </div><!-- Energy Report Module -->
+      <div class="module-card" onclick="showModuleInfo('energy')">
+       <div class="module-tooltip">
+        📈 Energy Report<br>
+        สรุปรายงานพลังงานรายวัน/เดือน
+       </div><span class="coming-soon-badge">COMING SOON</span>
+       <div class="text-4xl mb-4">
+        📈
+       </div>
+       <h3 class="font-display text-lg mb-2" style="color: var(--text-primary);">Energy Report</h3>
+       <p class="text-sm" style="color: var(--text-secondary);">Daily/Monthly Reports</p>
+      </div><!-- Asset Management Module -->
+      <div class="module-card" onclick="showModuleInfo('asset')">
+       <div class="module-tooltip">
+        🔧 Asset Management<br>
+        ทะเบียนครุภัณฑ์
+       </div><span class="coming-soon-badge">COMING SOON</span>
+       <div class="text-4xl mb-4">
+        🔧
+       </div>
+       <h3 class="font-display text-lg mb-2" style="color: var(--text-primary);">Asset Management</h3>
+       <p class="text-sm" style="color: var(--text-secondary);">Equipment Registry</p>
+      </div><!-- MA Contract Module -->
+      <div class="module-card" onclick="showModuleInfo('ma')">
+       <div class="module-tooltip">
+        📋 MA Contract<br>
+        ระบบบริหารสัญญาจ้างรายปี
+       </div><span class="coming-soon-badge">COMING SOON</span>
+       <div class="text-4xl mb-4">
+        📋
+       </div>
+       <h3 class="font-display text-lg mb-2" style="color: var(--text-primary);">MA Contract</h3>
+       <p class="text-sm" style="color: var(--text-secondary);">Annual Contract Mgmt</p>
+      </div><!-- Mobile WebApp Module -->
+      <div class="module-card" onclick="showModuleInfo('mobile')">
+       <div class="module-tooltip">
+        📱 Mobile WebApp<br>
+        ใช้งานในหน้างานได้สะดวก
+       </div><span class="coming-soon-badge">COMING SOON</span>
+       <div class="text-4xl mb-4">
+        📱
+       </div>
+       <h3 class="font-display text-lg mb-2" style="color: var(--text-primary);">Mobile WebApp</h3>
+       <p class="text-sm" style="color: var(--text-secondary);">Field Operations</p>
+      </div>
+     </div>
+    </section>
+   </main>
+  </div><!-- Mute Button --> <button id="mute-btn" class="mute-btn" onclick="toggleMute()"> <i class="fa-solid fa-volume-high"></i> </button> <!-- System Modal -->
+  <div id="system-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+   <div class="cyber-card p-6 w-full max-w-lg max-h-[90%] overflow-auto">
+    <div class="flex items-center justify-between mb-6">
+     <h3 class="font-display text-xl" id="modal-title" style="color: var(--text-primary);">Add New System</h3><button onclick="closeModal('system-modal')" class="text-2xl" style="color: var(--text-secondary);">×</button>
+    </div>
+    <form id="system-form" class="space-y-4"><input type="hidden" id="form-id"> <input type="hidden" id="form-backend-id">
+     <div><label for="form-name" class="block text-sm mb-2" style="color: var(--text-secondary);">System Name</label> <input type="text" id="form-name" class="cyber-input" placeholder="e.g. Chiller System" required>
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div><label for="form-building" class="block text-sm mb-2" style="color: var(--text-secondary);">Hospital</label> <select id="form-building" class="cyber-input"> <option value="VM">ViMUT (VM)</option> <option value="VTH">Theptarin (VTH)</option> <option value="all">All</option> </select>
+      </div>
+      <div><label for="form-unit" class="block text-sm mb-2" style="color: var(--text-secondary);">Unit</label> <input type="text" id="form-unit" class="cyber-input" placeholder="e.g. kW/TR, °C, Hz">
+      </div>
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div><label for="form-min" class="block text-sm mb-2" style="color: var(--text-secondary);">Min Value</label> <input type="number" step="any" id="form-min" class="cyber-input" placeholder="Leave empty if not used">
+      </div>
+      <div><label for="form-max" class="block text-sm mb-2" style="color: var(--text-secondary);">Max Value</label> <input type="number" step="any" id="form-max" class="cyber-input" placeholder="Leave empty if not used">
+      </div>
+     </div>
+     <div><label for="form-alert" class="block text-sm mb-2" style="color: var(--text-secondary);">Alert Message</label> <textarea id="form-alert" class="cyber-input" rows="3" placeholder="e.g. Check Chiller efficiency immediately"></textarea>
+     </div>
+     <div class="flex items-center gap-3 pt-2"><input type="checkbox" id="form-active" checked class="w-5 h-5 rounded"> <label for="form-active" style="color: var(--text-primary);">Enable this system</label>
+     </div>
+     <div class="flex gap-3 pt-4"><button type="submit" id="form-submit-btn" class="cyber-btn flex-1"> <i class="fa-solid fa-save mr-2"></i>Save </button> <button type="button" onclick="closeModal('system-modal')" class="cyber-btn cyber-btn-danger flex-1">Cancel</button>
+     </div>
+    </form>
+   </div>
+  </div><!-- Dashboard Modal -->
+  <div id="dashboard-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+   <div class="cyber-card p-6 w-full max-w-lg max-h-[90%] overflow-auto">
+    <div class="flex items-center justify-between mb-6">
+     <h3 class="font-display text-xl" id="dashboard-modal-title" style="color: var(--text-primary);">Add New Dashboard</h3><button onclick="closeModal('dashboard-modal')" class="text-2xl" style="color: var(--text-secondary);">×</button>
+    </div>
+    <form id="dashboard-form" class="space-y-4"><input type="hidden" id="dash-id"> <input type="hidden" id="dash-backend-id">
+     <div><label for="dash-name" class="block text-sm mb-2" style="color: var(--text-secondary);">Dashboard Name</label> <input type="text" id="dash-name" class="cyber-input" placeholder="e.g. Energy Monitor" required>
+     </div>
+     <div><label for="dash-url" class="block text-sm mb-2" style="color: var(--text-secondary);">URL</label> <input type="url" id="dash-url" class="cyber-input" placeholder="https://..." required>
+     </div>
+     <div class="grid grid-cols-2 gap-4">
+      <div><label for="dash-icon" class="block text-sm mb-2" style="color: var(--text-secondary);">Icon (Emoji)</label> <input type="text" id="dash-icon" class="cyber-input" placeholder="📊" maxlength="4">
+      </div>
+      <div><label for="dash-building" class="block text-sm mb-2" style="color: var(--text-secondary);">Building</label> <select id="dash-building" class="cyber-input"> <option value="VM">ViMUT (VM)</option> <option value="VTH">Theptarin (VTH)</option> <option value="all">All</option> </select>
+      </div>
+     </div>
+     <div class="flex gap-3 pt-4"><button type="submit" id="dash-submit-btn" class="cyber-btn flex-1"> <i class="fa-solid fa-save mr-2"></i>Save </button> <button type="button" onclick="closeModal('dashboard-modal')" class="cyber-btn cyber-btn-danger flex-1">Cancel</button>
+     </div>
+    </form>
+   </div>
+  </div><!-- History Chart Modal -->
+  <div id="history-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+   <div class="cyber-card p-6 w-full max-w-2xl max-h-[90%] overflow-auto">
+    <div class="flex items-center justify-between mb-6">
+     <h3 class="font-display text-xl" id="history-modal-title" style="color: var(--text-primary);">📊 Historical Data</h3><button onclick="closeModal('history-modal')" class="text-2xl" style="color: var(--text-secondary);">×</button>
+    </div>
+    <div id="history-system-info" class="mb-4 p-4 rounded-xl border" style="background: rgba(0,0,0,0.3); border-color: var(--border-color);">
+     <div class="flex items-center gap-3"><span id="history-icon" class="text-3xl">🌡️</span>
+      <div>
+       <h4 id="history-name" class="font-bold text-lg" style="color: var(--text-primary);">System Name</h4>
+       <p id="history-threshold" class="text-sm" style="color: var(--text-secondary);">Threshold info</p>
+      </div>
+     </div>
+    </div>
+    <div class="cyber-card p-4 mb-4" style="height: 280px;">
+     <canvas id="history-chart"></canvas>
+    </div>
+    <div class="grid grid-cols-3 gap-4 text-center">
+     <div class="p-3 rounded-xl border" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3);">
+      <div id="history-min" class="text-2xl font-display text-green-400">
+       0
+      </div>
+      <div class="text-xs" style="color: var(--text-secondary);">
+       Min
+      </div>
+     </div>
+     <div class="p-3 rounded-xl border" style="background: rgba(0,245,255,0.1); border-color: var(--border-color);">
+      <div id="history-avg" class="text-2xl font-display" style="color: var(--accent-cyan);">
+       0
+      </div>
+      <div class="text-xs" style="color: var(--text-secondary);">
+       Average
+      </div>
+     </div>
+     <div class="p-3 rounded-xl border" style="background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3);">
+      <div id="history-max" class="text-2xl font-display text-red-400">
+       0
+      </div>
+      <div class="text-xs" style="color: var(--text-secondary);">
+       Max
+      </div>
+     </div>
+    </div>
+    <p class="text-center mt-4 text-sm" style="color: var(--text-secondary);"><i class="fa-solid fa-clock mr-1"></i> Last 24 hours (simulated)</p>
+   </div>
+  </div><!-- Toast -->
+  <div id="toast" class="fixed top-6 right-6 z-50 hidden">
+   <div class="cyber-card px-6 py-4 flex items-center gap-3"><i id="toast-icon" class="fa-solid fa-check-circle text-green-400 text-xl"></i> <span id="toast-message" style="color: var(--text-primary);"></span>
+   </div>
+  </div>
+  <script>
+        // ============================================
+        // CONFIGURATION & STATE
+        // ============================================
+        
+        const defaultConfig = { app_title: 'iMATOMs - AI Analytics Dashboard Pro' };
+        
+        const ADMIN_USER = { username: 'admin', password: 'admin1234', role: 'admin', building: 'all' };
+        
+        const defaultDashboards = [
+            { dashboard_id: 'vm-1', dashboard_name: '🏥 ViMUT SMART (VM)', dashboard_url: 'https://lookerstudio.google.com/reporting/4be14bed-81e8-461e-9489-4c94a63dd125/page/p_nfsx6224id', dashboard_building: 'VM', dashboard_icon: '🏥' },
+            { dashboard_id: 'vm-2', dashboard_name: '🛡️ VM SAFETY', dashboard_url: 'https://lookerstudio.google.com/reporting/b865dbca-accb-49bc-a306-614245aef600/page/S0IMF', dashboard_building: 'VM', dashboard_icon: '🛡️' },
+            { dashboard_id: 'vth-1', dashboard_name: '🏨 THEPTARIN (VTH)', dashboard_url: 'https://lookerstudio.google.com/reporting/baa2ac8b-9f66-4276-90c6-be191812184d/page/XJvUF', dashboard_building: 'VTH', dashboard_icon: '🏨' },
+            { dashboard_id: 'iot', dashboard_name: '📡 Model A AIoT', dashboard_url: 'https://www.modelaaiot.com/dashboard/JdIcXHOF4gG3smYXyF5V', dashboard_building: 'all', dashboard_icon: '📡' },
+            { dashboard_id: 'solar', dashboard_name: '☀️ FUSION SOLAR', dashboard_url: 'https://sg5.fusionsolar.huawei.com/pvmswebsite/login/build/index.html', dashboard_building: 'all', dashboard_icon: '☀️' }
+        ];
+        
+        const defaultSystems = [
+            { type: 'system', system_id: 'chiller', system_name: '🧊 Chiller System', building: 'VM', threshold_min: null, threshold_max: 0.75, unit: 'kW/TR', alert_message: 'Chiller efficiency low - check immediately', is_active: true },
+            { type: 'system', system_id: 'xray-temp', system_name: '🌡️ XRAY Temperature', building: 'VM', threshold_min: null, threshold_max: 25, unit: '°C', alert_message: 'XRAY room temperature too high', is_active: true },
+            { type: 'system', system_id: 'vsd', system_name: '⚡ VSD Monitor', building: 'VM', threshold_min: 45, threshold_max: 55, unit: 'Hz', alert_message: 'VSD frequency abnormal', is_active: true },
+            { type: 'system', system_id: 'energy', system_name: '🔌 Energy Monitor', building: 'VM', threshold_min: null, threshold_max: 500, unit: 'kW', alert_message: 'Abnormally high energy consumption', is_active: true }
+        ];
+        
+        const appsData = [
+            { hospital: "ViMUT Hospital", name: "Dashboard XRAY Temp", url: "https://www.appsheet.com/start/0788eed4-99c2-4cf0-9dca-26d6f8cc077f", icon: "📊", color: "#4CAF50" },
+            { hospital: "ViMUT Hospital", name: "iFEMs Dashboard WR", url: "https://www.appsheet.com/start/91a7575e-feee-4aa8-bfa6-57325fa5b3e7", icon: "🖥️", color: "#00BCD4" },
+            { hospital: "ViMUT Hospital", name: "Daily ENERGY Monitor", url: "https://www.appsheet.com/start/629bda75-2fe2-48a0-b7e4-2834750d7483", icon: "⚡", color: "#8BC34A" },
+            { hospital: "ViMUT Hospital", name: "STAFF Utilization", url: "https://www.appsheet.com/start/a4842628-e483-4686-bdab-2ec567d7cf2d", icon: "👥", color: "#9C27B0" },
+            { hospital: "ViMUT Hospital", name: "Dashboard Security", url: "https://www.appsheet.com/start/6228d314-154f-4351-bdfd-7dda53385904", icon: "🛡️", color: "#607D8B" },
+            { hospital: "ViMUT Hospital", name: "VSD Monitor", url: "https://www.appsheet.com/start/7cedd341-6b86-41a3-97cc-cb7ce5c995d5", icon: "🚀", color: "#E91E63" },
+            { hospital: "ViMUT Hospital", name: "Waste Water System", url: "https://www.appsheet.com/start/c218dfc5-308b-40a0-b25e-7ca16160de56", icon: "♻️", color: "#43A047" },
+            { hospital: "ViMUT Hospital", name: "PPM Room Electric", url: "https://www.appsheet.com/start/9e4c56ef-b78e-4c88-9938-fa2b4c5d0ecf", icon: "🔌", color: "#F44336" },
+            { hospital: "ViMUT Hospital", name: "Daily Op Chiller", url: "https://www.appsheet.com/start/0682c57a-71aa-4b05-8349-ae5e148fdcc8", icon: "❄️", color: "#03A9F4" }
+        ];
+        
+        let allData = [];
+        let currentUser = null;
+        let currentFilter = 'all';
+        let userFilter = 'all';
+        let appFilter = 'all';
+        let isDarkMode = true;
+        let isMuted = false;
+        let currentLang = 'en';
+        
+        const simulatedValues = { 'chiller': 0.82, 'xray-temp': 23.5, 'vsd': 50, 'energy': 485 };
+        
+        // ============================================
+        // DATE TIME DISPLAY
+        // ============================================
+        
+        function updateDateTime() {
+            const now = new Date();
+            const timeEl = document.getElementById('current-time');
+            const dateEl = document.getElementById('current-date');
+            
+            if (timeEl && dateEl) {
+                timeEl.textContent = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const locale = currentLang === 'th' ? 'th-TH' : 'en-US';
+                dateEl.textContent = now.toLocaleDateString(locale, options);
+            }
+        }
+        
+        // Update every second
+        setInterval(updateDateTime, 1000);
+        
+        // ============================================
+        // PASSWORD TOGGLE
+        // ============================================
+        
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+        
+        // ============================================
+        // DATA HELPERS
+        // ============================================
+        
+        function getUsers() { return allData.filter(d => d.type === 'user'); }
+        function getSystems() { 
+            const systems = allData.filter(d => d.type === 'system');
+            return systems.length > 0 ? systems : defaultSystems;
+        }
+        function getDashboards() { 
+            const dashboards = allData.filter(d => d.type === 'dashboard');
+            return dashboards.length > 0 ? dashboards : defaultDashboards;
+        }
+        
+        // ============================================
+        // SDK INITIALIZATION
+        // ============================================
+        
+        const dataHandler = {
+            onDataChanged(data) {
+                allData = data;
+                if (currentUser) renderAll();
+            }
+        };
+        
+        async function initApp() {
+            if (window.elementSdk) {
+                await window.elementSdk.init({
+                    defaultConfig,
+                    onConfigChange: async (config) => {
+                        document.title = config.app_title || defaultConfig.app_title;
+                    },
+                    mapToCapabilities: () => ({ recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined }),
+                    mapToEditPanelValues: (config) => new Map([['app_title', config.app_title || defaultConfig.app_title]])
+                });
+            }
+            
+            if (window.dataSdk) {
+                await window.dataSdk.init(dataHandler);
+            }
+            
+            if (localStorage.getItem('theme') === 'light') toggleTheme();
+            if (localStorage.getItem('lang') === 'th') toggleLanguage();
+            
+            updateDateTime();
+        }
+        
+        // ============================================
+        // THEME & LANGUAGE TOGGLE
+        // ============================================
+        
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.documentElement.classList.toggle('light-mode', !isDarkMode);
+            document.body.classList.toggle('light-mode', !isDarkMode);
+            document.getElementById('theme-icon').className = isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        }
+        
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'th' : 'en';
+            document.getElementById('lang-indicator').textContent = currentLang.toUpperCase();
+            localStorage.setItem('lang', currentLang);
+            updateDateTime();
+        }
+        
+        // ============================================
+        // AUTHENTICATION
+        // ============================================
+        
+        function toggleAuthForm() {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const toggleText = document.getElementById('toggle-text');
+            
+            if (loginForm.style.display !== 'none') {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                toggleText.innerHTML = 'Already have an account? <button type="button" onclick="toggleAuthForm()" class="text-cyan-400 hover:underline font-semibold">Login</button>';
+            } else {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                toggleText.innerHTML = 'Don\'t have an account? <button type="button" onclick="toggleAuthForm()" class="text-cyan-400 hover:underline font-semibold">Register</button>';
+            }
+        }
+        
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            
+            if (username === ADMIN_USER.username && password === ADMIN_USER.password) {
+                currentUser = { ...ADMIN_USER, status: 'approved' };
+                loginSuccess();
+                return;
+            }
+            
+            const users = getUsers();
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                if (user.status === 'pending') {
+                    errorEl.textContent = 'Your account is pending admin approval';
+                    errorEl.classList.remove('hidden');
+                } else if (user.status === 'rejected') {
+                    errorEl.textContent = 'Your account has been rejected. Please contact admin';
+                    errorEl.classList.remove('hidden');
+                } else {
+                    currentUser = user;
+                    loginSuccess();
+                }
+            } else {
+                errorEl.textContent = 'Invalid username or password';
+                errorEl.classList.remove('hidden');
+            }
+        });
+        
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('reg-username').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const building = document.getElementById('reg-building').value;
+            
+            const errorEl = document.getElementById('register-error');
+            const successEl = document.getElementById('register-success');
+            const btn = document.getElementById('register-btn');
+            
+            errorEl.classList.add('hidden');
+            successEl.classList.add('hidden');
+            
+            const users = getUsers();
+            if (users.some(u => u.username === username) || username === 'admin') {
+                errorEl.textContent = 'This username is already taken';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            
+            if (allData.length >= 999) {
+                errorEl.textContent = 'System is full. Cannot register';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Registering...';
+            
+            if (window.dataSdk) {
+                const result = await window.dataSdk.create({
+                    type: 'user',
+                    username,
+                    email,
+                    password,
+                    building,
+                    role: 'user',
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                });
+                
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i>Register';
+                
+                if (result.isOk) {
+                    successEl.textContent = 'Registration successful! Please wait for admin approval';
+                    successEl.classList.remove('hidden');
+                    document.getElementById('register-form').reset();
+                } else {
+                    errorEl.textContent = 'An error occurred. Please try again';
+                    errorEl.classList.remove('hidden');
+                }
+            }
+        });
+        
+        function loginSuccess() {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            
+            document.getElementById('user-display-name').textContent = currentUser.username;
+            document.getElementById('user-display-role').textContent = currentUser.role === 'admin' ? 'Administrator' : `User (${currentUser.building})`;
+            
+            renderNavMenu();
+            renderAll();
+        }
+        
+        function logout() {
+            currentUser = null;
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('login-page').style.display = 'flex';
+            document.getElementById('login-form').reset();
+            document.getElementById('login-error').classList.add('hidden');
+        }
+        
+        function renderNavMenu() {
+            const isAdmin = currentUser.role === 'admin';
+            
+            let navHtml = `
+                <div class="nav-item special active" onclick="showPage('imatoms')" data-page="imatoms">
+                    <i class="fa-solid fa-atom w-6"></i>
+                    <span class="ml-3">iMATOMs</span>
+                </div>
+                <div class="nav-divider"></div>
+                <div class="nav-section-title">Main Menu</div>
+                <div class="nav-item" onclick="showPage('monitor')" data-page="monitor">
+                    <i class="fa-solid fa-tv w-6"></i>
+                    <span class="ml-3">Monitor</span>
+                </div>
+                <div class="nav-item" onclick="showPage('iot')" data-page="iot">
+                    <i class="fa-solid fa-microchip w-6"></i>
+                    <span class="ml-3">IoT Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="showPage('ai')" data-page="ai">
+                    <i class="fa-solid fa-robot w-6"></i>
+                    <span class="ml-3">AI Analytics</span>
+                    <span id="alert-badge" class="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
+                </div>
+            `;
+            
+            if (isAdmin) {
+                navHtml += `
+                <div class="nav-item" onclick="showPage('datasetup')" data-page="datasetup">
+                    <i class="fa-solid fa-database w-6"></i>
+                    <span class="ml-3">Data Setup</span>
+                </div>
+                `;
+            }
+            
+            navHtml += `
+                <div class="nav-item" onclick="showPage('apps')" data-page="apps">
+                    <i class="fa-solid fa-mobile-screen w-6"></i>
+                    <span class="ml-3">Apps</span>
+                </div>
+            `;
+            
+            if (isAdmin) {
+                navHtml += `
+                <div class="nav-item" onclick="showPage('admin')" data-page="admin">
+                    <i class="fa-solid fa-user-gear w-6"></i>
+                    <span class="ml-3">Admin</span>
+                </div>
+                `;
+            }
+            
+            navHtml += `
+                <div class="nav-divider"></div>
+                <div class="nav-section-title">Future Modules</div>
+                <div class="nav-item" onclick="showPage('modules')" data-page="modules">
+                    <i class="fa-solid fa-rocket w-6"></i>
+                    <span class="ml-3">Future Modules</span>
+                    <span class="ml-auto text-xs px-2 py-0.5 rounded-full" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan)); color: white;">6</span>
+                </div>
+            `;
+            
+            document.getElementById('nav-menu').innerHTML = navHtml;
+        }
+        
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        
+        function showPage(pageId) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === pageId);
+            });
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.toggle('active', page.id === `page-${pageId}`);
+            });
+        }
+        
+        function showDataSetupTab(tab, btn) {
+            document.querySelectorAll('#datasetup-tabs .tab-cyber').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            document.querySelectorAll('.datasetup-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(`datasetup-${tab}`).classList.remove('hidden');
+        }
+        
+        function showModuleInfo(module) {
+            showToast(`${module.toUpperCase()} module coming soon!`, 'info');
+        }
+        
+        // ============================================
+        // RENDER ALL
+        // ============================================
+        
+        function renderAll() {
+            renderMonitorTabs();
+            renderSystems();
+            renderSettings();
+            renderDashboards();
+            renderApps();
+            renderUsers();
+            updateStats();
+            checkAlerts();
+        }
+        
+        // ============================================
+        // MONITOR PAGE
+        // ============================================
+        
+        function renderMonitorTabs() {
+            const dashboards = getDashboards();
+            const userBuilding = currentUser?.building;
+            
+            const filtered = userBuilding === 'all' || currentUser?.role === 'admin'
+                ? dashboards
+                : dashboards.filter(d => d.dashboard_building === userBuilding || d.dashboard_building === 'all');
+            
+            document.getElementById('monitor-tabs').innerHTML = filtered.map((d, i) => `
+                <button class="tab-cyber ${i === 0 ? 'active' : ''}" onclick="loadDashboard('${d.dashboard_id}', this)" data-dashboard-id="${d.dashboard_id}">
+                    ${d.dashboard_name}
+                </button>
+            `).join('');
+            
+            if (filtered.length > 0) loadDashboard(filtered[0].dashboard_id);
+        }
+        
+        function loadDashboard(dashboardId, btn) {
+            const dashboards = getDashboards();
+            const dashboard = dashboards.find(d => d.dashboard_id === dashboardId);
+            if (!dashboard) return;
+            
+            document.querySelectorAll('#monitor-tabs .tab-cyber').forEach(b => {
+                b.classList.toggle('active', b.dataset.dashboardId === dashboardId);
+            });
+            
+            document.getElementById('monitor-placeholder').classList.add('hidden');
+            document.getElementById('monitor-info').classList.remove('hidden');
+            
+            document.getElementById('monitor-icon').innerHTML = `<span class="text-6xl">${dashboard.dashboard_icon || '📊'}</span>`;
+            document.getElementById('monitor-title').textContent = dashboard.dashboard_name;
+            document.getElementById('monitor-building').textContent = dashboard.dashboard_building === 'all' ? 'All Buildings' : `Building: ${dashboard.dashboard_building}`;
+            document.getElementById('monitor-link').href = dashboard.dashboard_url;
+            document.getElementById('monitor-url').textContent = dashboard.dashboard_url;
+        }
+        
+        function setDashboardSize(type, size) {
+            const container = document.getElementById(`${type}-container`);
+            container.className = `dashboard-container size-${size} cyber-card p-1 relative`;
+            
+            const section = container.closest('section');
+            section.querySelectorAll('.size-btn').forEach((btn, i) => {
+                const sizes = ['small', 'medium', 'large', 'full'];
+                btn.classList.toggle('active', sizes[i] === size);
+            });
+        }
+        
+        function hideIotLoading() {
+            document.getElementById('iot-loading').classList.add('hidden');
+        }
+        
+        // ============================================
+        // SYSTEMS
+        // ============================================
+        
+        function getSystemStatus(system) {
+            const value = simulatedValues[system.system_id] || 0;
+            const min = system.threshold_min;
+            const max = system.threshold_max;
+            
+            if (min !== null && value < min) return 'danger';
+            if (max !== null && value > max) return 'danger';
+            if (max !== null && value > max * 0.9) return 'warning';
+            if (min !== null && value < min * 1.1) return 'warning';
+            
+            return 'success';
+        }
+        
+        function renderSystems() {
+            const container = document.getElementById('systems-grid');
+            let systems = getSystems();
+            const userBuilding = currentUser?.building;
+            
+            if (userBuilding !== 'all' && currentUser?.role !== 'admin') {
+                systems = systems.filter(s => s.building === userBuilding || s.building === 'all');
+            }
+            
+            if (currentFilter === 'alert') {
+                systems = systems.filter(s => getSystemStatus(s) !== 'success');
+            } else if (currentFilter !== 'all') {
+                systems = systems.filter(s => s.building === currentFilter);
+            }
+            
+            if (systems.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(0,245,255,0.1);">
+                            <i class="fa-solid fa-check text-3xl" style="color: var(--accent-cyan);"></i>
+                        </div>
+                        <h3 class="text-xl mb-2" style="color: var(--text-primary);">No Data</h3>
+                        <p style="color: var(--text-secondary);">All systems operating normally</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const statusColors = {
+                success: { bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.3)', text: '#10b981', icon: 'fa-check-circle' },
+                warning: { bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.3)', text: '#f59e0b', icon: 'fa-exclamation-triangle' },
+                danger: { bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.3)', text: '#ef4444', icon: 'fa-times-circle' }
+            };
+            
+            container.innerHTML = systems.map(system => {
+                const status = getSystemStatus(system);
+                const value = simulatedValues[system.system_id] || 0;
+                const color = statusColors[status];
+                const isAlert = status !== 'success';
+                
+                return `
+                    <div class="status-card ${status} cyber-card p-5 ${isAlert ? 'cursor-pointer hover:scale-[1.02] transition-transform' : ''}" ${isAlert ? `onclick="showHistoryChart('${system.system_id}')"` : ''}>
+                        <div class="flex items-start justify-between mb-4">
+                            <div>
+                                <h3 class="font-bold text-lg" style="color: var(--text-primary);">${system.system_name}</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">${system.building === 'all' ? 'All Buildings' : system.building}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center ${status === 'danger' ? 'alert-flash' : ''}" style="background: ${color.bg}; border: 1px solid ${color.border};">
+                                <i class="fa-solid ${color.icon}" style="color: ${color.text};"></i>
+                            </div>
+                        </div>
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <div class="text-3xl font-display font-bold" style="color: ${color.text};">${value.toFixed(2)}</div>
+                                <div class="text-sm" style="color: var(--text-secondary);">${system.unit}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs" style="color: var(--text-secondary);">Threshold</div>
+                                <div class="text-sm" style="color: var(--text-secondary);">
+                                    ${system.threshold_min !== null ? `Min: ${system.threshold_min}` : ''}
+                                    ${system.threshold_min !== null && system.threshold_max !== null ? ' | ' : ''}
+                                    ${system.threshold_max !== null ? `Max: ${system.threshold_max}` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        ${isAlert ? `
+                            <div class="mt-4 p-3 rounded-lg" style="background: ${color.bg}; border: 1px solid ${color.border};">
+                                <p class="text-sm" style="color: ${color.text};"><i class="fa-solid fa-info-circle mr-2"></i>${system.alert_message}</p>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <span class="text-xs px-3 py-1 rounded-full" style="background: rgba(0,245,255,0.15); color: var(--accent-cyan);">
+                                    <i class="fa-solid fa-chart-line mr-1"></i>Click to view history
+                                </span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function filterSystems(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('#ai-filter-tabs .tab-cyber').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderSystems();
+        }
+        
+        // ============================================
+        // SETTINGS
+        // ============================================
+        
+        function renderSettings() {
+            const container = document.getElementById('settings-list');
+            const systems = getSystems();
+            
+            if (systems.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 cyber-card"><p style="color: var(--text-secondary);">No data</p></div>';
+                return;
+            }
+            
+            container.innerHTML = systems.map(system => `
+                <div class="cyber-card p-5">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center border" style="border-color: var(--border-color);">
+                                <span class="text-2xl">${system.system_name.split(' ')[0]}</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold" style="color: var(--text-primary);">${system.system_name}</h3>
+                                <p class="text-sm" style="color: var(--text-secondary);">
+                                    ${system.building === 'all' ? 'All Buildings' : system.building} | 
+                                    ${system.threshold_min !== null ? `Min: ${system.threshold_min}` : ''}
+                                    ${system.threshold_min !== null && system.threshold_max !== null ? ' - ' : ''}
+                                    ${system.threshold_max !== null ? `Max: ${system.threshold_max}` : ''} ${system.unit}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 rounded-full text-xs ${system.is_active ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'}">
+                                ${system.is_active ? 'Active' : 'Inactive'}
+                            </span>
+                            <button onclick="editSystem('${system.system_id}')" class="w-10 h-10 rounded-lg border flex items-center justify-center transition-all" style="background: rgba(0,245,255,0.1); border-color: var(--border-color); color: var(--accent-cyan);">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="confirmDeleteSystem('${system.system_id}')" class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 flex items-center justify-center delete-btn" data-system-id="${system.system_id}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function showAddSystemModal() {
+            document.getElementById('modal-title').textContent = 'Add New System';
+            document.getElementById('system-form').reset();
+            document.getElementById('form-id').value = '';
+            document.getElementById('form-backend-id').value = '';
+            document.getElementById('form-active').checked = true;
+            openModal('system-modal');
+        }
+        
+        function editSystem(systemId) {
+            const system = getSystems().find(s => s.system_id === systemId);
+            if (!system) return;
+            
+            document.getElementById('modal-title').textContent = 'Edit System';
+            document.getElementById('form-id').value = system.system_id;
+            document.getElementById('form-backend-id').value = system.__backendId || '';
+            document.getElementById('form-name').value = system.system_name;
+            document.getElementById('form-building').value = system.building || 'VM';
+            document.getElementById('form-min').value = system.threshold_min !== null ? system.threshold_min : '';
+            document.getElementById('form-max').value = system.threshold_max !== null ? system.threshold_max : '';
+            document.getElementById('form-unit').value = system.unit;
+            document.getElementById('form-alert').value = system.alert_message;
+            document.getElementById('form-active').checked = system.is_active;
+            
+            openModal('system-modal');
+        }
+        
+        let pendingDeleteId = null;
+        
+        function confirmDeleteSystem(systemId) {
+            const system = getSystems().find(s => s.system_id === systemId);
+            if (!system) return;
+            
+            const btn = document.querySelector(`.delete-btn[data-system-id="${systemId}"]`);
+            
+            if (pendingDeleteId === systemId) {
+                performDeleteSystem(system);
+                pendingDeleteId = null;
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                return;
+            }
+            
+            pendingDeleteId = systemId;
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+            showToast('Click again to confirm deletion', 'warning');
+            
+            setTimeout(() => {
+                if (pendingDeleteId === systemId) {
+                    pendingDeleteId = null;
+                    if (btn) btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                }
+            }, 3000);
+        }
+        
+        async function performDeleteSystem(system) {
+            if (window.dataSdk && system.__backendId) {
+                const result = await window.dataSdk.delete(system);
+                showToast(result.isOk ? 'System deleted successfully' : 'An error occurred', result.isOk ? 'success' : 'error');
+            } else {
+                showToast('Cannot delete default system', 'warning');
+            }
+        }
+        
+        document.getElementById('system-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formId = document.getElementById('form-id').value;
+            const formBackendId = document.getElementById('form-backend-id').value;
+            const submitBtn = document.getElementById('form-submit-btn');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Saving...';
+            
+            const systemData = {
+                type: 'system',
+                system_id: formId || `system-${Date.now()}`,
+                system_name: document.getElementById('form-name').value,
+                building: document.getElementById('form-building').value,
+                threshold_min: document.getElementById('form-min').value ? parseFloat(document.getElementById('form-min').value) : null,
+                threshold_max: document.getElementById('form-max').value ? parseFloat(document.getElementById('form-max').value) : null,
+                unit: document.getElementById('form-unit').value,
+                alert_message: document.getElementById('form-alert').value,
+                is_active: document.getElementById('form-active').checked
+            };
+            
+            if (window.dataSdk) {
+                if (!formBackendId && allData.length >= 999) {
+                    showToast('Limit of 999 items reached', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-save mr-2"></i>Save';
+                    return;
+                }
+                
+                let result;
+                if (formBackendId) {
+                    const existing = allData.find(d => d.__backendId === formBackendId);
+                    if (existing) result = await window.dataSdk.update({ ...existing, ...systemData });
+                } else {
+                    result = await window.dataSdk.create(systemData);
+                }
+                
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-save mr-2"></i>Save';
+                
+                if (result && result.isOk) {
+                    showToast(formBackendId ? 'Updated successfully' : 'New system added', 'success');
+                    closeModal('system-modal');
+                } else {
+                    showToast('An error occurred', 'error');
+                }
+            }
+        });
+        
+        // ============================================
+        // DASHBOARDS MANAGEMENT
+        // ============================================
+        
+        function renderDashboards() {
+            const container = document.getElementById('dashboard-list');
+            const dashboards = getDashboards();
+            
+            container.innerHTML = dashboards.map(d => `
+                <div class="cyber-card p-5">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center border text-2xl" style="border-color: var(--border-color);">
+                                ${d.dashboard_icon || '📊'}
+                            </div>
+                            <div>
+                                <h3 class="font-bold" style="color: var(--text-primary);">${d.dashboard_name}</h3>
+                                <p class="text-sm truncate max-w-md" style="color: var(--text-secondary);">${d.dashboard_url}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 rounded-full text-xs" style="background: rgba(0,245,255,0.1); color: var(--accent-cyan);">${d.dashboard_building}</span>
+                            <button onclick="editDashboard('${d.dashboard_id}')" class="w-10 h-10 rounded-lg border flex items-center justify-center" style="background: rgba(0,245,255,0.1); border-color: var(--border-color); color: var(--accent-cyan);">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="confirmDeleteDashboard('${d.dashboard_id}')" class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 flex items-center justify-center delete-dash-btn" data-dash-id="${d.dashboard_id}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function showAddDashboardModal() {
+            document.getElementById('dashboard-modal-title').textContent = 'Add New Dashboard';
+            document.getElementById('dashboard-form').reset();
+            document.getElementById('dash-id').value = '';
+            document.getElementById('dash-backend-id').value = '';
+            openModal('dashboard-modal');
+        }
+        
+        function editDashboard(dashId) {
+            const dashboard = getDashboards().find(d => d.dashboard_id === dashId);
+            if (!dashboard) return;
+            
+            document.getElementById('dashboard-modal-title').textContent = 'Edit Dashboard';
+            document.getElementById('dash-id').value = dashboard.dashboard_id;
+            document.getElementById('dash-backend-id').value = dashboard.__backendId || '';
+            document.getElementById('dash-name').value = dashboard.dashboard_name;
+            document.getElementById('dash-url').value = dashboard.dashboard_url;
+            document.getElementById('dash-icon').value = dashboard.dashboard_icon || '';
+            document.getElementById('dash-building').value = dashboard.dashboard_building || 'all';
+            
+            openModal('dashboard-modal');
+        }
+        
+        let pendingDeleteDashId = null;
+        
+        function confirmDeleteDashboard(dashId) {
+            const dashboard = getDashboards().find(d => d.dashboard_id === dashId);
+            if (!dashboard) return;
+            
+            const btn = document.querySelector(`.delete-dash-btn[data-dash-id="${dashId}"]`);
+            
+            if (pendingDeleteDashId === dashId) {
+                performDeleteDashboard(dashboard);
+                pendingDeleteDashId = null;
+                if (btn) btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                return;
+            }
+            
+            pendingDeleteDashId = dashId;
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+            showToast('Click again to confirm deletion', 'warning');
+            
+            setTimeout(() => {
+                if (pendingDeleteDashId === dashId) {
+                    pendingDeleteDashId = null;
+                    if (btn) btn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                }
+            }, 3000);
+        }
+        
+        async function performDeleteDashboard(dashboard) {
+            if (window.dataSdk && dashboard.__backendId) {
+                const result = await window.dataSdk.delete(dashboard);
+                showToast(result.isOk ? 'Dashboard deleted successfully' : 'An error occurred', result.isOk ? 'success' : 'error');
+            } else {
+                showToast('Cannot delete default dashboard', 'warning');
+            }
+        }
+        
+        document.getElementById('dashboard-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const dashId = document.getElementById('dash-id').value;
+            const dashBackendId = document.getElementById('dash-backend-id').value;
+            const submitBtn = document.getElementById('dash-submit-btn');
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Saving...';
+            
+            const dashData = {
+                type: 'dashboard',
+                dashboard_id: dashId || `dash-${Date.now()}`,
+                dashboard_name: document.getElementById('dash-name').value,
+                dashboard_url: document.getElementById('dash-url').value,
+                dashboard_icon: document.getElementById('dash-icon').value || '📊',
+                dashboard_building: document.getElementById('dash-building').value
+            };
+            
+            if (window.dataSdk) {
+                if (!dashBackendId && allData.length >= 999) {
+                    showToast('Limit of 999 items reached', 'error');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-save mr-2"></i>Save';
+                    return;
+                }
+                
+                let result;
+                if (dashBackendId) {
+                    const existing = allData.find(d => d.__backendId === dashBackendId);
+                    if (existing) result = await window.dataSdk.update({ ...existing, ...dashData });
+                } else {
+                    result = await window.dataSdk.create(dashData);
+                }
+                
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-save mr-2"></i>Save';
+                
+                if (result && result.isOk) {
+                    showToast(dashBackendId ? 'Dashboard updated' : 'New dashboard added', 'success');
+                    closeModal('dashboard-modal');
+                } else {
+                    showToast('An error occurred', 'error');
+                }
+            }
+        });
+        
+        // ============================================
+        // APPS
+        // ============================================
+        
+        function renderApps() {
+            const container = document.getElementById('apps-grid');
+            let apps = appsData;
+            
+            if (appFilter !== 'all') {
+                apps = apps.filter(a => a.hospital.includes(appFilter));
+            }
+            
+            container.innerHTML = apps.map(app => `
+                <a href="${app.url}" target="_blank" rel="noopener noreferrer" class="cyber-card p-4 transition-all group cursor-pointer block">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background: ${app.color}20;">
+                            ${app.icon}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold truncate group-hover:text-cyan-400 transition-colors" style="color: var(--text-primary);">${app.name}</h3>
+                            <p class="text-sm truncate" style="color: var(--text-secondary);">${app.hospital}</p>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square group-hover:text-cyan-400 transition-colors" style="color: var(--text-secondary);"></i>
+                    </div>
+                </a>
+            `).join('');
+        }
+        
+        function filterApps(filter, btn) {
+            appFilter = filter;
+            document.querySelectorAll('#apps-filter-tabs .tab-cyber').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderApps();
+        }
+        
+        // ============================================
+        // USER MANAGEMENT
+        // ============================================
+        
+        function renderUsers() {
+            const container = document.getElementById('users-list');
+            let users = getUsers();
+            
+            if (userFilter !== 'all') {
+                users = users.filter(u => u.status === userFilter);
+            }
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="text-center py-8"><p style="color: var(--text-secondary);">No users</p></div>';
+                return;
+            }
+            
+            const statusBadge = { pending: 'badge-pending', approved: 'badge-approved', rejected: 'badge-rejected' };
+            const statusText = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' };
+            
+            container.innerHTML = users.map(user => `
+                <div class="p-4 rounded-xl border flex items-center justify-between flex-wrap gap-4" style="background: rgba(0,0,0,0.3); border-color: var(--border-color);">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center">
+                            <i class="fa-solid fa-user text-white"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold" style="color: var(--text-primary);">${user.username}</span>
+                                <span class="user-badge ${statusBadge[user.status]}">${statusText[user.status]}</span>
+                            </div>
+                            <p class="text-sm" style="color: var(--text-secondary);">${user.email} | Building: ${user.building}</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        ${user.status === 'pending' ? `
+                            <button onclick="updateUserStatus('${user.__backendId}', 'approved')" class="cyber-btn cyber-btn-success text-sm py-2 px-4">
+                                <i class="fa-solid fa-check mr-1"></i>Approve
+                            </button>
+                            <button onclick="updateUserStatus('${user.__backendId}', 'rejected')" class="cyber-btn cyber-btn-danger text-sm py-2 px-4">
+                                <i class="fa-solid fa-times mr-1"></i>Reject
+                            </button>
+                        ` : `
+                            <button onclick="updateUserStatus('${user.__backendId}', '${user.status === 'approved' ? 'rejected' : 'approved'}')" class="cyber-btn text-sm py-2 px-4">
+                                ${user.status === 'approved' ? '<i class="fa-solid fa-ban mr-1"></i>Suspend' : '<i class="fa-solid fa-check mr-1"></i>Approve'}
+                            </button>
+                            <button onclick="deleteUser('${user.__backendId}')" class="cyber-btn cyber-btn-danger text-sm py-2 px-4">
+                                <i class="fa-solid fa-trash mr-1"></i>Delete
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function filterUsers(filter, btn) {
+            userFilter = filter;
+            document.querySelectorAll('#user-filter-tabs .tab-cyber').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderUsers();
+        }
+        
+        async function updateUserStatus(backendId, newStatus) {
+            const user = allData.find(d => d.__backendId === backendId);
+            if (!user || !window.dataSdk) return;
+            
+            const result = await window.dataSdk.update({ ...user, status: newStatus });
+            showToast(result.isOk ? 'Status updated' : 'An error occurred', result.isOk ? 'success' : 'error');
+        }
+        
+        async function deleteUser(backendId) {
+            const user = allData.find(d => d.__backendId === backendId);
+            if (!user || !window.dataSdk) return;
+            
+            const result = await window.dataSdk.delete(user);
+            showToast(result.isOk ? 'User deleted' : 'An error occurred', result.isOk ? 'success' : 'error');
+        }
+        
+        // ============================================
+        // NOTIFICATIONS
+        // ============================================
+        
+        function testGoogleChat() {
+            const webhook = document.getElementById('google-chat-webhook').value;
+            if (!webhook) { showToast('Please enter Webhook URL first', 'error'); return; }
+            showToast('Test message sent to Google Chat', 'success');
+        }
+        
+        function testEmail() {
+            const recipients = document.getElementById('email-recipients').value;
+            if (!recipients) { showToast('Please enter Email first', 'error'); return; }
+            showToast('Test email sent', 'success');
+        }
+        
+        // ============================================
+        // STATS & ALERTS
+        // ============================================
+        
+        function updateStats() {
+            const systems = getSystems();
+            let normal = 0, warning = 0, danger = 0;
+            
+            systems.forEach(s => {
+                const status = getSystemStatus(s);
+                if (status === 'success') normal++;
+                else if (status === 'warning') warning++;
+                else danger++;
+            });
+            
+            document.getElementById('stat-total').textContent = systems.length;
+            document.getElementById('stat-normal').textContent = normal;
+            document.getElementById('stat-warning').textContent = warning;
+            document.getElementById('stat-danger').textContent = danger;
+        }
+        
+        function checkAlerts() {
+            const systems = getSystems();
+            const alertCount = systems.filter(s => getSystemStatus(s) !== 'success').length;
+            
+            const badge = document.getElementById('alert-badge');
+            const muteBtn = document.getElementById('mute-btn');
+            
+            if (badge) {
+                if (alertCount > 0) {
+                    badge.textContent = alertCount;
+                    badge.classList.remove('hidden');
+                    muteBtn.classList.add('active');
+                } else {
+                    badge.classList.add('hidden');
+                    muteBtn.classList.remove('active');
+                }
+            }
+        }
+        
+        function toggleMute() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('mute-btn');
+            const icon = btn.querySelector('i');
+            
+            if (isMuted) {
+                btn.classList.add('muted');
+                icon.className = 'fa-solid fa-volume-xmark';
+            } else {
+                btn.classList.remove('muted');
+                icon.className = 'fa-solid fa-volume-high';
+            }
+        }
+        
+        // ============================================
+        // HISTORY CHART
+        // ============================================
+        
+        let historyChart = null;
+        
+        function showHistoryChart(systemId) {
+            const system = getSystems().find(s => s.system_id === systemId);
+            if (!system) return;
+            
+            const iconEmoji = system.system_name.split(' ')[0];
+            document.getElementById('history-icon').textContent = iconEmoji;
+            document.getElementById('history-name').textContent = system.system_name;
+            document.getElementById('history-threshold').textContent = `Threshold: ${system.threshold_min !== null ? `Min: ${system.threshold_min}` : ''} ${system.threshold_max !== null ? `Max: ${system.threshold_max}` : ''} ${system.unit}`;
+            
+            const now = new Date();
+            const labels = [];
+            const data = [];
+            const baseValue = simulatedValues[systemId] || 50;
+            
+            for (let i = 23; i >= 0; i--) {
+                const time = new Date(now.getTime() - i * 3600000);
+                labels.push(time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+                
+                let variation = 0;
+                if (systemId === 'chiller') variation = (Math.random() - 0.5) * 0.3;
+                else if (systemId === 'xray-temp') variation = (Math.random() - 0.5) * 3;
+                else if (systemId === 'vsd') variation = (Math.random() - 0.5) * 8;
+                else variation = (Math.random() - 0.5) * 100;
+                data.push(parseFloat((baseValue + variation).toFixed(2)));
+            }
+            
+            const minVal = Math.min(...data).toFixed(2);
+            const maxVal = Math.max(...data).toFixed(2);
+            const avgVal = (data.reduce((a, b) => a + b, 0) / data.length).toFixed(2);
+            
+            document.getElementById('history-min').textContent = minVal;
+            document.getElementById('history-max').textContent = maxVal;
+            document.getElementById('history-avg').textContent = avgVal;
+            
+            const ctx = document.getElementById('history-chart');
+            const textColor = isDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)';
+            const gridColor = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            
+            if (historyChart) historyChart.destroy();
+            
+            const status = getSystemStatus(system);
+            const chartColor = status === 'danger' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#00f5ff';
+            
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        borderColor: chartColor,
+                        backgroundColor: `${chartColor}20`,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: chartColor
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 500 },
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: gridColor }, ticks: { color: textColor, maxRotation: 45, maxTicksLimit: 12 } },
+                        y: { grid: { color: gridColor }, ticks: { color: textColor } }
+                    }
+                }
+            });
+            
+            openModal('history-modal');
+        }
+        
+        // ============================================
+        // MODALS & TOAST
+        // ============================================
+        
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msg = document.getElementById('toast-message');
+            
+            const icons = {
+                success: 'fa-check-circle text-green-400',
+                error: 'fa-times-circle text-red-400',
+                warning: 'fa-exclamation-triangle text-yellow-400',
+                info: 'fa-info-circle text-blue-400'
+            };
+            
+            icon.className = `fa-solid ${icons[type]} text-xl`;
+            msg.textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+        
+        // ============================================
+        // INITIALIZE
+        // ============================================
+        
+        initApp();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9b7f21f524cad02a',t:'MTc2NzQwODAzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
